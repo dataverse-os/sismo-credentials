@@ -12,3 +12,9 @@ docs/
 
 # Dotenv file
 .env
+
+# dist
+dist/
+
+# idea
+.idea/
