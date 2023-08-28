@@ -8,8 +8,6 @@ import {DataTypes} from "./libraries/DataTypes.sol";
 import {Events} from "./libraries/Events.sol";
 import {Errors} from "./libraries/Errors.sol";
 
-import "forge-std/console.sol";
-
 contract Reputations is SismoConnect, Ownable {
     using SismoConnectHelper for SismoConnectVerifiedResult;
 
@@ -39,23 +37,12 @@ contract Reputations is SismoConnect, Ownable {
     }
 
     function deleteDataGroups(bytes16[] memory _groupIds) public onlyOwner {
-        console.log("input length: ", _groupIds.length);
         for (uint256 i; i < _groupIds.length; i++) {
             uint256 len = groupIds.length;
-            console.log("groupIds.length: ", groupIds.length);
-
             for (uint256 j; j < len; j++) {
                 if (groupIds[j] == _groupIds[i]) {
-                    console.log("i:", i);
-                    console.log("j:", j);
-                    console.log("groupIds[j] ");
-                    console.logBytes16(groupIds[j]);
-                    console.log("_groupIds[i] ");
-                    console.logBytes16(_groupIds[i]);
                     groupIds[j] = groupIds[len - 1];
                     groupIds.pop();
-                    //                    delete groupIds[len - 1];
-                    console.log("groupIds.length", groupIds.length);
                     delete groupSetups[_groupIds[i]];
                     emit Events.ReputationRemoved(_groupIds[i], block.timestamp);
                     break;
