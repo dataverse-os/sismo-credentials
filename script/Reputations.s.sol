@@ -3,11 +3,10 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import {MultiReputations} from "src/MultiReputations.sol";
-import "../src/MultiReputations.sol";
+import {Reputations} from "src/Reputations.sol";
 import "./Utils.sol";
 
-contract DeployMultiReputations is Script {
+contract DeployReputations is Script {
     // sismo dataGroupIds
     bytes16 public constant TEAM_MEMBERS_GROUP_ID = 0xf44c3e70f9147f1a4d59077451535f00;
     bytes16 public constant G2M_GROUP_ID = 0x7cccd0183c6ca02e76600996a671a824;
@@ -20,12 +19,12 @@ contract DeployMultiReputations is Script {
 
     function run() public {
         // config the dataGroups
-        MultiReputations.GroupSetup[] memory groups = new MultiReputations.GroupSetup[](2);
-        groups[0] = (MultiReputations.GroupSetup({groupId: TEAM_MEMBERS_GROUP_ID, startAt: 1000, duration: 1 days}));
-        groups[1] = (MultiReputations.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
+        Reputations.GroupSetup[] memory groups = new Reputations.GroupSetup[](2);
+        groups[0] = (Reputations.GroupSetup({groupId: TEAM_MEMBERS_GROUP_ID, startAt: 1000, duration: 1 days}));
+        groups[1] = (Reputations.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
 
         vm.startBroadcast();
-        MultiReputations reputation = new MultiReputations(
+        Reputations reputation = new Reputations(
             APP_ID,
             DURATION,
             isImpersonationMode,
@@ -35,6 +34,5 @@ contract DeployMultiReputations is Script {
         vm.stopBroadcast();
         
         console.log("MultiReputation Contract deployed at", address(reputation));
-
     }
 }

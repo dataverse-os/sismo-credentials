@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "forge-std/console.sol";
 import "sismo-connect-solidity/SismoLib.sol";
 
-contract MultiReputations is SismoConnect {
+contract Reputations is SismoConnect {
     using SismoConnectHelper for SismoConnectVerifiedResult;
 
-    event ReputationMapped(uint256 indexed vaultId, address indexed account, bytes16 indexed groupId, uint256 expiredAt);
+    event ReputationMapped(
+        uint256 indexed vaultId,
+        address indexed account,
+        bytes16 indexed groupId,
+        uint256 expiredAt
+    );
 
     struct Account {
         address account;
@@ -58,10 +62,7 @@ contract MultiReputations is SismoConnect {
         }
     }
 
-    function bindReputation(
-        address account,
-        bytes memory proof
-    ) public {
+    function bindReputation(address account, bytes memory proof) public {
         require(account != address(0), "Invalid address");
 
         AuthRequest[] memory auths = new AuthRequest[](1);
@@ -95,24 +96,9 @@ contract MultiReputations is SismoConnect {
         }
     }
 
-    function _checkReputation(address account, SismoConnectVerifiedResult memory result, uint256 vaultId) internal {
-        for (uint i = 0; i < result.claims.length; i++) {
-            VerifiedClaim memory verifiedClaim = result.claims[i];
-            bytes16 groupId = verifiedClaim.groupId;
-
-            GroupSetup memory group = groupSetups[groupId];
-            Reputation storage reputation = reputations[account][groupId];
-
-            uint256 expiredAt = block.timestamp + group.duration - (block.timestamp - group.startAt) % group.duration;
-
-            reputation.groupId = group.groupId;
-            reputation.value = true;
-            reputation.expiredAt = expiredAt;
-            emit ReputationMapped(vaultId, account, groupId, expiredAt);
-        }
-    }
-
-    function reputationDetail(address account) external view returns (Reputation[] memory){
+    function reputationDetail(
+        address account
+    ) external view returns (Reputation[] memory) {
         uint len = groupIds.length;
         Reputation[] memory infos = new Reputation[](len);
         for (uint i = 0; i < len; i++) {
@@ -120,5 +106,28 @@ contract MultiReputations is SismoConnect {
             infos[i] = r;
         }
         return infos;
+    }
+
+    function _checkReputation(
+        address account,
+        SismoConnectVerifiedResult memory result,
+        uint256 vaultId
+    ) internal {
+        for (uint i = 0; i < result.claims.length; i++) {
+            VerifiedClaim memory verifiedClaim = result.claims[i];
+            bytes16 groupId = verifiedClaim.groupId;
+
+            GroupSetup memory group = groupSetups[groupId];
+            Reputation storage reputation = reputations[account][groupId];
+
+            uint256 expiredAt = block.timestamp +
+                group.duration -
+                ((block.timestamp - group.startAt) % group.duration);
+
+            reputation.groupId = group.groupId;
+            reputation.value = true;
+            reputation.expiredAt = expiredAt;
+            emit ReputationMapped(vaultId, account, groupId, expiredAt);
+        }
     }
 }
