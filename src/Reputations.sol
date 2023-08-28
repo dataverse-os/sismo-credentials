@@ -2,56 +2,65 @@
 pragma solidity ^0.8.19;
 
 import "sismo-connect-solidity/SismoLib.sol";
-contract Reputations is SismoConnect {
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {DataTypes} from "./libraries/DataTypes.sol";
+import {Events} from "./libraries/Events.sol";
+import {Errors} from "./libraries/Errors.sol";
+
+import "forge-std/console.sol";
+
+contract Reputations is SismoConnect, Ownable {
     using SismoConnectHelper for SismoConnectVerifiedResult;
 
-    event ReputationMapped(
-        uint256 indexed vaultId, address indexed account, bytes16 indexed groupId, uint256 expiredAt
-    );
-
-    struct Account {
-        address account;
-        uint256 refreshAfter;
-    }
-
-    struct Reputation {
-        bytes16 groupId;
-        bool value;
-        uint256 expiredAt;
-    }
-
-    struct GroupSetup {
-        uint256 startAt;
-        bytes16 groupId;
-        uint256 duration;
-    }
-
     /// @dev mapping vaultId -> user account
-    mapping(uint256 => Account) internal _bindingAccount;
+    mapping(uint256 => DataTypes.Account) internal _bindingAccount;
 
     /// binding account => dataGroupId => reputation Info
-    mapping(address => mapping(bytes16 => Reputation)) public reputations;
+    mapping(address => mapping(bytes16 => DataTypes.Reputation)) public reputations;
 
     /// @dev groupId to group setting
-    mapping(bytes16 => GroupSetup) public groupSetups;
+    mapping(bytes16 => DataTypes.GroupSetup) public groupSetups;
 
     /// @dev after REFRESH_DURATION, user can bind a new account
     uint256 public immutable REFRESH_DURATION;
 
     bytes16[] public groupIds;
 
-    error UnableToBindBefore(uint256 before);
-
-    error UnableToBindNewAccountBefore(uint256 before);
-
-    constructor(bytes16 appId, uint256 duration, bool isImpersonationMode, GroupSetup[] memory groups)
+    constructor(bytes16 appId, uint256 duration, bool isImpersonationMode, DataTypes.GroupSetup[] memory groups)
         SismoConnect(buildConfig(appId, isImpersonationMode))
     {
         REFRESH_DURATION = duration;
+        _addDataGroups(groups);
+    }
 
-        for (uint256 i; i < groups.length; i++) {
-            groupSetups[groups[i].groupId] = groups[i];
-            groupIds.push(groups[i].groupId);
+    function addDataGroups(DataTypes.GroupSetup[] memory _groups) public onlyOwner {
+        _addDataGroups(_groups);
+    }
+
+    function deleteDataGroups(bytes16[] memory _groupIds) public onlyOwner {
+        console.log("input length: ", _groupIds.length);
+        for (uint256 i; i < _groupIds.length; i++) {
+            uint256 len = groupIds.length;
+            console.log("groupIds.length: ", groupIds.length);
+
+            for (uint256 j; j < len; j++) {
+                if (groupIds[j] == _groupIds[i]) {
+                    console.log("i:", i);
+                    console.log("j:", j);
+                    console.log("groupIds[j] ");
+                    console.logBytes16(groupIds[j]);
+                    console.log("_groupIds[i] ");
+                    console.logBytes16(_groupIds[i]);
+                    groupIds[j] = groupIds[len - 1];
+                    groupIds.pop();
+                    //                    delete groupIds[len - 1];
+                    console.log("groupIds.length", groupIds.length);
+                    delete groupSetups[_groupIds[i]];
+                    emit Events.ReputationRemoved(_groupIds[i], block.timestamp);
+                    break;
+                }
+            }
         }
     }
 
@@ -75,22 +84,31 @@ contract Reputations is SismoConnect {
         });
 
         uint256 vaultId = result.getUserId(AuthType.VAULT);
-        Account storage acc = _bindingAccount[vaultId];
-        /// todo: account 更新时间 和 声誉失效时间 有重叠
-        if (acc.refreshAfter < block.timestamp) {
+        DataTypes.Account storage acc = _bindingAccount[vaultId];
+        if (acc.refreshAfter <= block.timestamp) {
+            _clearPreviousBinding(acc.account);
             acc.account = account;
             acc.refreshAfter = block.timestamp + REFRESH_DURATION;
             _checkReputation(account, result, vaultId);
             return;
         }
+
+        _checkReputation(acc.account, result, vaultId);
     }
 
-    function reputationDetail(address account) external view returns (Reputation[] memory) {
+    function _clearPreviousBinding(address _account) internal {
         uint256 len = groupIds.length;
-        Reputation[] memory infos = new Reputation[](len);
         for (uint256 i = 0; i < len; i++) {
-            Reputation memory r = reputations[account][groupIds[i]];
-            if(r.expiredAt < block.timestamp) {
+            delete reputations[_account][groupIds[i]];
+        }
+    }
+
+    function reputationDetail(address account) external view returns (DataTypes.Reputation[] memory) {
+        uint256 len = groupIds.length;
+        DataTypes.Reputation[] memory infos = new DataTypes.Reputation[](len);
+        for (uint256 i = 0; i < len; i++) {
+            DataTypes.Reputation memory r = reputations[account][groupIds[i]];
+            if (r.expiredAt < block.timestamp) {
                 r.value = false;
             }
             infos[i] = r;
@@ -98,20 +116,42 @@ contract Reputations is SismoConnect {
         return infos;
     }
 
+    function reputationNumber() external view returns (uint256) {
+        return groupIds.length;
+    }
+
+    function _addDataGroups(DataTypes.GroupSetup[] memory _groups) internal {
+        for (uint256 i; i < _groups.length; i++) {
+            bytes16 groupId = _groups[i].groupId;
+
+            if (_groupExist(groupId)) {
+                continue;
+            }
+
+            groupSetups[groupId] = _groups[i];
+            groupIds.push(groupId);
+            emit Events.ReputationAdded(groupId, block.timestamp);
+        }
+    }
+
     function _checkReputation(address account, SismoConnectVerifiedResult memory result, uint256 vaultId) internal {
         for (uint256 i = 0; i < result.claims.length; i++) {
             VerifiedClaim memory verifiedClaim = result.claims[i];
             bytes16 groupId = verifiedClaim.groupId;
 
-            GroupSetup memory group = groupSetups[groupId];
-            Reputation storage reputation = reputations[account][groupId];
+            DataTypes.GroupSetup memory group = groupSetups[groupId];
+            DataTypes.Reputation storage reputation = reputations[account][groupId];
 
             uint256 expiredAt = block.timestamp + group.duration - ((block.timestamp - group.startAt) % group.duration);
 
             reputation.groupId = group.groupId;
             reputation.value = true;
             reputation.expiredAt = expiredAt;
-            emit ReputationMapped(vaultId, account, groupId, expiredAt);
+            emit Events.ReputationMapped(vaultId, account, groupId, expiredAt);
         }
+    }
+
+    function _groupExist(bytes16 _groupId) internal view returns (bool) {
+        return groupSetups[_groupId].groupId != bytes16(0);
     }
 }
