@@ -1,11 +1,8 @@
-
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
 contract Utils {
-    function bytes16ToHexString(
-        bytes16 _bytes16
-    ) public pure returns (string memory) {
+    function bytes16ToHexString(bytes16 _bytes16) public pure returns (string memory) {
         bytes memory hexString = new bytes(32);
         for (uint256 i = 0; i < 16; i++) {
             uint8 nibble1 = uint8(_bytes16[i]) >> 4;
@@ -24,10 +21,7 @@ contract Utils {
         }
     }
 
-    function concatStrings(
-        string memory _str1,
-        string memory _str2
-    ) public pure returns (string memory) {
+    function concatStrings(string memory _str1, string memory _str2) public pure returns (string memory) {
         bytes memory str1Bytes = bytes(_str1);
         bytes memory str2Bytes = bytes(_str2);
         bytes memory result = new bytes(str1Bytes.length + str2Bytes.length);

@@ -7,10 +7,7 @@ contract Reputations is SismoConnect {
     using SismoConnectHelper for SismoConnectVerifiedResult;
 
     event ReputationMapped(
-        uint256 indexed vaultId,
-        address indexed account,
-        bytes16 indexed groupId,
-        uint256 expiredAt
+        uint256 indexed vaultId, address indexed account, bytes16 indexed groupId, uint256 expiredAt
     );
 
     struct Account {
@@ -48,12 +45,9 @@ contract Reputations is SismoConnect {
 
     error UnableToBindNewAccountBefore(uint256 before);
 
-    constructor(
-        bytes16 appId,
-        uint256 duration,
-        bool isImpersonationMode,
-        GroupSetup[] memory groups
-    ) SismoConnect(buildConfig(appId, isImpersonationMode)) {
+    constructor(bytes16 appId, uint256 duration, bool isImpersonationMode, GroupSetup[] memory groups)
+        SismoConnect(buildConfig(appId, isImpersonationMode))
+    {
         REFRESH_DURATION = duration;
 
         for (uint256 i; i < groups.length; i++) {
@@ -71,11 +65,7 @@ contract Reputations is SismoConnect {
         uint256 len = groupIds.length;
         ClaimRequest[] memory claims = new ClaimRequest[](len);
         for (uint256 i; i < len; i++) {
-            claims[i] = buildClaim({
-                groupId: groupIds[i],
-                isSelectableByUser: false,
-                isOptional: true
-            });
+            claims[i] = buildClaim({groupId: groupIds[i], isSelectableByUser: false, isOptional: true});
         }
 
         SismoConnectVerifiedResult memory result = verify({
@@ -96,33 +86,25 @@ contract Reputations is SismoConnect {
         }
     }
 
-    function reputationDetail(
-        address account
-    ) external view returns (Reputation[] memory) {
-        uint len = groupIds.length;
+    function reputationDetail(address account) external view returns (Reputation[] memory) {
+        uint256 len = groupIds.length;
         Reputation[] memory infos = new Reputation[](len);
-        for (uint i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; i++) {
             Reputation memory r = reputations[account][groupIds[i]];
             infos[i] = r;
         }
         return infos;
     }
 
-    function _checkReputation(
-        address account,
-        SismoConnectVerifiedResult memory result,
-        uint256 vaultId
-    ) internal {
-        for (uint i = 0; i < result.claims.length; i++) {
+    function _checkReputation(address account, SismoConnectVerifiedResult memory result, uint256 vaultId) internal {
+        for (uint256 i = 0; i < result.claims.length; i++) {
             VerifiedClaim memory verifiedClaim = result.claims[i];
             bytes16 groupId = verifiedClaim.groupId;
 
             GroupSetup memory group = groupSetups[groupId];
             Reputation storage reputation = reputations[account][groupId];
 
-            uint256 expiredAt = block.timestamp +
-                group.duration -
-                ((block.timestamp - group.startAt) % group.duration);
+            uint256 expiredAt = block.timestamp + group.duration - ((block.timestamp - group.startAt) % group.duration);
 
             reputation.groupId = group.groupId;
             reputation.value = true;

@@ -32,7 +32,7 @@ contract DeployReputations is Script {
         );
 
         vm.stopBroadcast();
-        
+
         console.log("MultiReputation Contract deployed at", address(reputation));
     }
 }
