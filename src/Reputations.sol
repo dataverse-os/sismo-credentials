@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import "sismo-connect-solidity/SismoLib.sol";
-
 contract Reputations is SismoConnect {
     using SismoConnectHelper for SismoConnectVerifiedResult;
 
@@ -91,6 +90,9 @@ contract Reputations is SismoConnect {
         Reputation[] memory infos = new Reputation[](len);
         for (uint256 i = 0; i < len; i++) {
             Reputation memory r = reputations[account][groupIds[i]];
+            if(r.expiredAt < block.timestamp) {
+                r.value = false;
+            }
             infos[i] = r;
         }
         return infos;
