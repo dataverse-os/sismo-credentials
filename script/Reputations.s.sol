@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import {Reputations} from "src/Reputations.sol";
+import {DataTypes} from "src/libraries/DataTypes.sol";
 import "./Utils.sol";
 
 contract DeployReputations is Script {
@@ -19,9 +20,9 @@ contract DeployReputations is Script {
 
     function run() public {
         // config the dataGroups
-        Reputations.GroupSetup[] memory groups = new Reputations.GroupSetup[](2);
-        groups[0] = (Reputations.GroupSetup({groupId: TEAM_MEMBERS_GROUP_ID, startAt: 1000, duration: 1 days}));
-        groups[1] = (Reputations.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
+        DataTypes.GroupSetup[] memory groups = new DataTypes.GroupSetup[](2);
+        groups[0] = (DataTypes.GroupSetup({groupId: TEAM_MEMBERS_GROUP_ID, startAt: 1000, duration: 1 days}));
+        groups[1] = (DataTypes.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
 
         vm.startBroadcast();
         Reputations reputation = new Reputations(
