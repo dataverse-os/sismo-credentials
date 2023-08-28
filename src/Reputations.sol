@@ -2,7 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "sismo-connect-solidity/SismoLib.sol";
-import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Events} from "./libraries/Events.sol";
 import {Errors} from "./libraries/Errors.sol";
@@ -28,21 +29,30 @@ contract Reputations is SismoConnect, Ownable {
         SismoConnect(buildConfig(appId, isImpersonationMode))
     {
         REFRESH_DURATION = duration;
+        _addDataGroups(groups);
+    }
 
-        for (uint256 i; i < groups.length; i++) {
-            groupSetups[groups[i].groupId] = groups[i];
-            groupIds.push(groups[i].groupId);
+    function addDataGroups(DataTypes.GroupSetup[] memory _groups) public onlyOwner {
+        _addDataGroups(_groups);
+    }
+
+    function deleteDataGroups(bytes16[] memory _groupIds) public onlyOwner {
+        for (uint256 i; i < _groupIds.length; i++) {
+            uint256 len = groupIds.length;
+            for (uint256 j; j < len; j++) {
+                if (groupIds[j] == _groupIds[i]) {
+                    groupIds[j] = groupIds[len - 1];
+                    groupIds.pop();
+                    delete groupSetups[_groupIds[i]];
+                    emit Events.ReputationRemoved(_groupIds[i], block.timestamp);
+                    break;
+                }
+            }
         }
     }
 
-    function addDataGroups(DataTypes.GroupSetup[] memory _groups) public onlyOwner {}
-
-    function deleteDataGroups(bytes16[] memory _groupIds) public onlyOwner {}
-
     function bindReputation(address account, bytes memory proof) public {
-        if (account == address(0)) {
-            revert Errors.InvalidAddress();
-        }
+        require(account != address(0), "Invalid address");
 
         AuthRequest[] memory auths = new AuthRequest[](1);
         auths[0] = buildAuth({authType: AuthType.VAULT});
@@ -62,12 +72,21 @@ contract Reputations is SismoConnect, Ownable {
 
         uint256 vaultId = result.getUserId(AuthType.VAULT);
         DataTypes.Account storage acc = _bindingAccount[vaultId];
-        /// todo: account 更新时间 和 声誉失效时间 有重叠
-        if (acc.refreshAfter < block.timestamp) {
+        if (acc.refreshAfter <= block.timestamp) {
+            _clearPreviousBinding(acc.account);
             acc.account = account;
             acc.refreshAfter = block.timestamp + REFRESH_DURATION;
             _checkReputation(account, result, vaultId);
             return;
+        }
+
+        _checkReputation(acc.account, result, vaultId);
+    }
+
+    function _clearPreviousBinding(address _account) internal {
+        uint256 len = groupIds.length;
+        for (uint256 i = 0; i < len; i++) {
+            delete reputations[_account][groupIds[i]];
         }
     }
 
@@ -76,9 +95,30 @@ contract Reputations is SismoConnect, Ownable {
         DataTypes.Reputation[] memory infos = new DataTypes.Reputation[](len);
         for (uint256 i = 0; i < len; i++) {
             DataTypes.Reputation memory r = reputations[account][groupIds[i]];
+            if (r.expiredAt < block.timestamp) {
+                r.value = false;
+            }
             infos[i] = r;
         }
         return infos;
+    }
+
+    function reputationNumber() external view returns (uint256) {
+        return groupIds.length;
+    }
+
+    function _addDataGroups(DataTypes.GroupSetup[] memory _groups) internal {
+        for (uint256 i; i < _groups.length; i++) {
+            bytes16 groupId = _groups[i].groupId;
+
+            if (_groupExist(groupId)) {
+                continue;
+            }
+
+            groupSetups[groupId] = _groups[i];
+            groupIds.push(groupId);
+            emit Events.ReputationAdded(groupId, block.timestamp);
+        }
     }
 
     function _checkReputation(address account, SismoConnectVerifiedResult memory result, uint256 vaultId) internal {
@@ -96,5 +136,9 @@ contract Reputations is SismoConnect, Ownable {
             reputation.expiredAt = expiredAt;
             emit Events.ReputationMapped(vaultId, account, groupId, expiredAt);
         }
+    }
+
+    function _groupExist(bytes16 _groupId) internal view returns (bool) {
+        return groupSetups[_groupId].groupId != bytes16(0);
     }
 }
