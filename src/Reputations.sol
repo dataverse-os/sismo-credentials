@@ -99,6 +99,7 @@ contract Reputations is SismoConnect, Ownable {
                 r.value = false;
             }
             infos[i] = r;
+            infos[i].groupId = groupIds[i];
         }
         return infos;
     }
