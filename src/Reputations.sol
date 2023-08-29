@@ -52,7 +52,9 @@ contract Reputations is SismoConnect, Ownable {
     }
 
     function bindReputation(address account, bytes memory proof) public {
-        require(account != address(0), "Invalid address");
+        if(account == address(0)) {
+            revert Errors.InvalidAddress();
+        }
 
         AuthRequest[] memory auths = new AuthRequest[](1);
         auths[0] = buildAuth({authType: AuthType.VAULT});
