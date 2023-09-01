@@ -17,18 +17,19 @@ contract DeploySismoCredential is Script {
     bool isImpersonationMode = false;
 
     function run() public {
-        // config the dataGroups
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+
+        // config dataGroups
         DataTypes.GroupSetup[] memory groups = new DataTypes.GroupSetup[](2);
         groups[0] = (DataTypes.GroupSetup({groupId: TEAM_MEMBERS_GROUP_ID, startAt: 1000, duration: 1 days}));
         groups[1] = (DataTypes.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
 
-        vm.startBroadcast();
+        vm.broadcast(deployerPrivateKey);
         new SismoCredential(
             APP_ID,
             DURATION,
             isImpersonationMode,
             groups
         );
-        vm.stopBroadcast();
     }
 }

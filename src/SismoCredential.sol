@@ -105,6 +105,7 @@ contract SismoCredential is SismoConnect, Ownable {
                 r.value = false;
             }
             infos[i] = r;
+            infos[i].groupId = _groupIds[i];
         }
         return infos;
     }

@@ -7,7 +7,9 @@ anvil --fork-url https://gateway.tenderly.co/public/polygon-mumbai --chain-id 51
 # edit deploy script with customized dataGroups
 
 # deploy contracts
-forge script DeployReputations --rpc-url http://localhost:8545 -vv --mnemonics 'test test test test test test test test test test test junk' --sender '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' --broadcast
+```
+forge script script/DataPool.s.sol --rpc-url $MUMBAI_RPC_URL --broadcast -vvvv
+```
 
 # test
 forge test --fork-url https://gateway.tenderly.co/public/polygon-mumbai
