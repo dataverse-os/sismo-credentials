@@ -8,22 +8,22 @@ import {DataTypes} from "./libraries/DataTypes.sol";
 import {Events} from "./libraries/Events.sol";
 import {Errors} from "./libraries/Errors.sol";
 
-contract Reputations is SismoConnect, Ownable {
+contract SismoCredential is SismoConnect, Ownable {
     using SismoConnectHelper for SismoConnectVerifiedResult;
 
-    /// @dev mapping vaultId -> user account
+    /// @dev vaultId -> user account
     mapping(uint256 => DataTypes.Account) internal _bindingAccount;
 
-    /// binding account => dataGroupId => reputation Info
-    mapping(address => mapping(bytes16 => DataTypes.Reputation)) public reputations;
+    /// @dev account => dataGroupId => credential info
+    mapping(address => mapping(bytes16 => DataTypes.CredentialInfo)) public getCredentialInfo;
 
-    /// @dev groupId to group setting
-    mapping(bytes16 => DataTypes.GroupSetup) public groupSetups;
+    /// @dev groupId => group setting
+    mapping(bytes16 => DataTypes.GroupSetup) public getGroupSetup;
 
-    /// @dev after REFRESH_DURATION, user can bind a new account
+    /// @notice after REFRESH_DURATION, user can bind a new account
     uint256 public immutable REFRESH_DURATION;
 
-    bytes16[] public groupIds;
+    bytes16[] internal _groupIds;
 
     constructor(bytes16 appId, uint256 duration, bool isImpersonationMode, DataTypes.GroupSetup[] memory groups)
         SismoConnect(buildConfig(appId, isImpersonationMode))
@@ -32,37 +32,41 @@ contract Reputations is SismoConnect, Ownable {
         _addDataGroups(groups);
     }
 
+    function getGroupIds() public view returns (bytes16[] memory) {
+        return _groupIds;
+    }
+
     function addDataGroups(DataTypes.GroupSetup[] memory _groups) public onlyOwner {
         _addDataGroups(_groups);
     }
 
-    function deleteDataGroups(bytes16[] memory _groupIds) public onlyOwner {
-        for (uint256 i; i < _groupIds.length; i++) {
-            uint256 len = groupIds.length;
+    function deleteDataGroups(bytes16[] memory groupIds) public onlyOwner {
+        for (uint256 i; i < groupIds.length; i++) {
+            uint256 len = _groupIds.length;
             for (uint256 j; j < len; j++) {
-                if (groupIds[j] == _groupIds[i]) {
-                    groupIds[j] = groupIds[len - 1];
-                    groupIds.pop();
-                    delete groupSetups[_groupIds[i]];
-                    emit Events.ReputationRemoved(_groupIds[i], block.timestamp);
+                if (_groupIds[j] == groupIds[i]) {
+                    _groupIds[j] = _groupIds[len - 1];
+                    _groupIds.pop();
+                    delete getGroupSetup[groupIds[i]];
+                    emit Events.CredentialRemoved(groupIds[i], block.timestamp);
                     break;
                 }
             }
         }
     }
 
-    function bindReputation(address account, bytes memory proof) public {
-        if(account == address(0)) {
+    function bindCredential(address account, bytes memory proof) public {
+        if (account == address(0)) {
             revert Errors.InvalidAddress();
         }
 
         AuthRequest[] memory auths = new AuthRequest[](1);
         auths[0] = buildAuth({authType: AuthType.VAULT});
 
-        uint256 len = groupIds.length;
+        uint256 len = _groupIds.length;
         ClaimRequest[] memory claims = new ClaimRequest[](len);
         for (uint256 i; i < len; i++) {
-            claims[i] = buildClaim({groupId: groupIds[i], isSelectableByUser: false, isOptional: true});
+            claims[i] = buildClaim({groupId: _groupIds[i], isSelectableByUser: false, isOptional: true});
         }
 
         SismoConnectVerifiedResult memory result = verify({
@@ -78,36 +82,32 @@ contract Reputations is SismoConnect, Ownable {
             _clearPreviousBinding(acc.account);
             acc.account = account;
             acc.refreshAfter = block.timestamp + REFRESH_DURATION;
-            _checkReputation(account, result, vaultId);
+            _checkSismoCredential(account, result, vaultId);
             return;
         }
 
-        _checkReputation(acc.account, result, vaultId);
+        _checkSismoCredential(acc.account, result, vaultId);
     }
 
     function _clearPreviousBinding(address _account) internal {
-        uint256 len = groupIds.length;
+        uint256 len = _groupIds.length;
         for (uint256 i = 0; i < len; i++) {
-            delete reputations[_account][groupIds[i]];
+            delete getCredentialInfo[_account][_groupIds[i]];
         }
     }
 
-    function reputationDetail(address account) external view returns (DataTypes.Reputation[] memory) {
-        uint256 len = groupIds.length;
-        DataTypes.Reputation[] memory infos = new DataTypes.Reputation[](len);
+    function getCredentialInfoList(address account) external view returns (DataTypes.CredentialInfo[] memory) {
+        uint256 len = _groupIds.length;
+        DataTypes.CredentialInfo[] memory infos = new DataTypes.CredentialInfo[](len);
         for (uint256 i = 0; i < len; i++) {
-            DataTypes.Reputation memory r = reputations[account][groupIds[i]];
+            DataTypes.CredentialInfo memory r = getCredentialInfo[account][_groupIds[i]];
             if (r.expiredAt < block.timestamp) {
                 r.value = false;
             }
             infos[i] = r;
-            infos[i].groupId = groupIds[i];
+            infos[i].groupId = _groupIds[i];
         }
         return infos;
-    }
-
-    function reputationNumber() external view returns (uint256) {
-        return groupIds.length;
     }
 
     function _addDataGroups(DataTypes.GroupSetup[] memory _groups) internal {
@@ -118,30 +118,32 @@ contract Reputations is SismoConnect, Ownable {
                 continue;
             }
 
-            groupSetups[groupId] = _groups[i];
-            groupIds.push(groupId);
-            emit Events.ReputationAdded(groupId, block.timestamp);
+            getGroupSetup[groupId] = _groups[i];
+            _groupIds.push(groupId);
+            emit Events.CredentialAdded(groupId, block.timestamp);
         }
     }
 
-    function _checkReputation(address account, SismoConnectVerifiedResult memory result, uint256 vaultId) internal {
+    function _checkSismoCredential(address account, SismoConnectVerifiedResult memory result, uint256 vaultId)
+        internal
+    {
         for (uint256 i = 0; i < result.claims.length; i++) {
             VerifiedClaim memory verifiedClaim = result.claims[i];
             bytes16 groupId = verifiedClaim.groupId;
 
-            DataTypes.GroupSetup memory group = groupSetups[groupId];
-            DataTypes.Reputation storage reputation = reputations[account][groupId];
+            DataTypes.GroupSetup memory group = getGroupSetup[groupId];
+            DataTypes.CredentialInfo storage credentialInfo = getCredentialInfo[account][groupId];
 
             uint256 expiredAt = block.timestamp + group.duration - ((block.timestamp - group.startAt) % group.duration);
 
-            reputation.groupId = group.groupId;
-            reputation.value = true;
-            reputation.expiredAt = expiredAt;
-            emit Events.ReputationMapped(vaultId, account, groupId, expiredAt);
+            credentialInfo.groupId = group.groupId;
+            credentialInfo.value = true;
+            credentialInfo.expiredAt = expiredAt;
+            emit Events.CredentialMapped(vaultId, account, groupId, expiredAt);
         }
     }
 
     function _groupExist(bytes16 _groupId) internal view returns (bool) {
-        return groupSetups[_groupId].groupId != bytes16(0);
+        return getGroupSetup[_groupId].groupId != bytes16(0);
     }
 }
