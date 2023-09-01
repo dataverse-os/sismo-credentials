@@ -11,16 +11,16 @@ import {Errors} from "./libraries/Errors.sol";
 contract SismoCredential is SismoConnect, Ownable {
     using SismoConnectHelper for SismoConnectVerifiedResult;
 
-    /// @dev mapping vaultId -> user account
+    /// @dev vaultId -> user account
     mapping(uint256 => DataTypes.Account) internal _bindingAccount;
 
-    /// binding account => dataGroupId => credential Info
+    /// @dev account => dataGroupId => credential info
     mapping(address => mapping(bytes16 => DataTypes.CredentialInfo)) public getCredentialInfo;
 
-    /// @dev groupId to group setting
+    /// @dev groupId => group setting
     mapping(bytes16 => DataTypes.GroupSetup) public getGroupSetup;
 
-    /// @dev after REFRESH_DURATION, user can bind a new account
+    /// @notice after REFRESH_DURATION, user can bind a new account
     uint256 public immutable REFRESH_DURATION;
 
     bytes16[] internal _groupIds;
