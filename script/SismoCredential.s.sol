@@ -2,10 +2,10 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import {SismoCredentials} from "src/SismoCredentials.sol";
+import {SismoCredential} from "src/SismoCredential.sol";
 import {DataTypes} from "src/libraries/DataTypes.sol";
 
-contract DeploySismoCredentials is Script {
+contract DeploySismoCredential is Script {
     // sismo dataGroupIds
     bytes16 public constant TEAM_MEMBERS_GROUP_ID = 0xf44c3e70f9147f1a4d59077451535f00;
     bytes16 public constant G2M_GROUP_ID = 0x7cccd0183c6ca02e76600996a671a824;
@@ -23,7 +23,7 @@ contract DeploySismoCredentials is Script {
         groups[1] = (DataTypes.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
 
         vm.startBroadcast();
-        new SismoCredentials(
+        new SismoCredential(
             APP_ID,
             DURATION,
             isImpersonationMode,

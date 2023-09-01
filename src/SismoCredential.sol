@@ -8,7 +8,7 @@ import {DataTypes} from "./libraries/DataTypes.sol";
 import {Events} from "./libraries/Events.sol";
 import {Errors} from "./libraries/Errors.sol";
 
-contract SismoCredentials is SismoConnect, Ownable {
+contract SismoCredential is SismoConnect, Ownable {
     using SismoConnectHelper for SismoConnectVerifiedResult;
 
     /// @dev mapping vaultId -> user account
@@ -96,7 +96,7 @@ contract SismoCredentials is SismoConnect, Ownable {
         }
     }
 
-    function getCredentialInfos(address account) external view returns (DataTypes.CredentialInfo[] memory) {
+    function getCredentialInfoList(address account) external view returns (DataTypes.CredentialInfo[] memory) {
         uint256 len = _groupIds.length;
         DataTypes.CredentialInfo[] memory infos = new DataTypes.CredentialInfo[](len);
         for (uint256 i = 0; i < len; i++) {
