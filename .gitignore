@@ -18,3 +18,7 @@ dist/
 
 # idea
 .idea/
+
+# demo
+front/
+reputations-sdk/

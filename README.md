@@ -11,6 +11,10 @@ anvil --fork-url https://gateway.tenderly.co/public/polygon-mumbai --chain-id 51
 forge script script/DataPool.s.sol --rpc-url $MUMBAI_RPC_URL --broadcast -vvvv
 ```
 
+# or deploy with owner's private key
+forge script DeployReputations --rpc-url http://localhost:8545 -vv --private-key $PRIVATE_KEY --broadcast
+
+
 # test
 forge test --fork-url https://gateway.tenderly.co/public/polygon-mumbai
 
