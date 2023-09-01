@@ -7,7 +7,7 @@ library DataTypes {
         uint256 refreshAfter;
     }
 
-    struct Reputation {
+    struct CredentialInfo {
         bytes16 groupId;
         bool value;
         uint256 expiredAt;

@@ -2,11 +2,11 @@
 pragma solidity ^0.8.19;
 
 library Events {
-    event ReputationMapped(
+    event CredentialMapped(
         uint256 indexed vaultId, address indexed account, bytes16 indexed groupId, uint256 expiredAt
     );
 
-    event ReputationAdded(bytes16 indexed groupId, uint256 timestamp);
+    event CredentialAdded(bytes16 indexed groupId, uint256 timestamp);
 
-    event ReputationRemoved(bytes16 indexed groupId, uint256 timestamp);
+    event CredentialRemoved(bytes16 indexed groupId, uint256 timestamp);
 }

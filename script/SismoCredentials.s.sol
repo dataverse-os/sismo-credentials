@@ -2,12 +2,10 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "forge-std/console.sol";
-import {Reputations} from "src/Reputations.sol";
+import {SismoCredentials} from "src/SismoCredentials.sol";
 import {DataTypes} from "src/libraries/DataTypes.sol";
-import "./Utils.sol";
 
-contract DeployReputations is Script {
+contract DeploySismoCredentials is Script {
     // sismo dataGroupIds
     bytes16 public constant TEAM_MEMBERS_GROUP_ID = 0xf44c3e70f9147f1a4d59077451535f00;
     bytes16 public constant G2M_GROUP_ID = 0x7cccd0183c6ca02e76600996a671a824;
@@ -25,15 +23,12 @@ contract DeployReputations is Script {
         groups[1] = (DataTypes.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
 
         vm.startBroadcast();
-        Reputations reputation = new Reputations(
+        new SismoCredentials(
             APP_ID,
             DURATION,
             isImpersonationMode,
             groups
         );
-
         vm.stopBroadcast();
-
-        console.log("MultiReputation Contract deployed at", address(reputation));
     }
 }
