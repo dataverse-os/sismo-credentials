@@ -14,13 +14,15 @@ interface IAvailableRootsRegistry {
 }
 
 contract BaseTest is Test {
-    IAddressesProvider sismoAddressesProvider = IAddressesProvider(0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05);
+    IAddressesProvider sismoAddressesProvider =
+    IAddressesProvider(0x3Cd5334eB64ebBd4003b72022CC25465f1BFcEe6);
     IAvailableRootsRegistry availableRootsRegistry;
 
     function _registerTreeRoot(uint256 root) internal {
         // get availableRootsRegistry from the sismoAddressesProvider
-        availableRootsRegistry =
-            IAvailableRootsRegistry(sismoAddressesProvider.get("sismoConnectAvailableRootsRegistry"));
+        availableRootsRegistry = IAvailableRootsRegistry(
+            sismoAddressesProvider.get("sismoConnectAvailableRootsRegistry")
+        );
         address rootsRegistryOwner = availableRootsRegistry.owner();
         // prank to the rootsRegistryOwner
         vm.startPrank(rootsRegistryOwner);
