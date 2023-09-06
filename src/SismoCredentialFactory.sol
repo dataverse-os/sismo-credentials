@@ -8,7 +8,7 @@ import {Events} from "./libraries/Events.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {SismoCredential} from "./SismoCredential.sol";
 
-contract CredentialFactory {
+contract SismoCredentialFactory {
     constructor() {}
 
     function createCredential(

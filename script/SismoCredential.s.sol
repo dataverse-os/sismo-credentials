@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import {SismoCredential} from "src/SismoCredential.sol";
 import {CredentialFactory} from "src/CredentialFactory.sol";
 import {DataTypes} from "src/libraries/DataTypes.sol";
-import "../src/CredentialFactory.sol";
+import {SismoCredentialFactory} from "../src/SismoCredentialFactory.sol";
 
 contract DeploySismoCredential is Script {
     address credentialFactoryAddr = 0x1Cb68d1149b78F0528414B78F72eD2A0305E39d4;
@@ -27,9 +27,9 @@ contract DeploySismoCredential is Script {
         groups[0] = (DataTypes.GroupSetup({groupId: TEAM_MEMBERS_GROUP_ID, startAt: 1000, duration: 1 days}));
         groups[1] = (DataTypes.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
 
-        vm.broadcast(deployerPrivateKey);
         CredentialFactory factory = CredentialFactory(credentialFactoryAddr);
-
+        
+        vm.broadcast(deployerPrivateKey);
         address newCredential = factory.createCredential(APP_ID, DURATION, isImpersonationMode, groups);
         console.log("new deployed credential: ", newCredential);
     }

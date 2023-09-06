@@ -2,11 +2,11 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import {SismoCredential} from "src/SismoCredential.sol";
+import {SismoCredentialFactory} from "src/SismoCredentialFactory.sol";
 import {DataTypes} from "src/libraries/DataTypes.sol";
 import "../src/CredentialFactory.sol";
 
-contract DeployCredentialFactory is Script {
+contract DeploySismoCredentialFactory is Script {
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
