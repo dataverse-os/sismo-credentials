@@ -30,3 +30,6 @@ forge test --match-contract SismoCredentialsTest --match-test test_getCredential
 forge test --match-contract SismoCredentialsTest --match-test test_getCredentialInfoList_should_not_return_deleted_credential --fork-url https://gateway.tenderly.co/public/polygon-mumbai
 
 forge test --match-contract SismoCredentialsTest --match-test test_should_bind_new_account_after_refresh_duration --fork-url https://gateway.tenderly.co/public/polygon-mumbai
+
+forge test --match-contract CredentialFactoryTest  --fork-url https://gateway.tenderly.co/public/polygon-mumbai
+

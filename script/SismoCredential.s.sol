@@ -26,6 +26,7 @@ contract DeploySismoCredential is Script {
 
         vm.broadcast(deployerPrivateKey);
         new SismoCredential(
+            vm.addr(deployerPrivateKey),
             APP_ID,
             DURATION,
             isImpersonationMode,

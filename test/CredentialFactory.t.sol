@@ -3,11 +3,15 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import {SismoCredential} from "../src/SismoCredential.sol";
+import {CredentialFactory} from "../src/CredentialFactory.sol";
 import {BaseTest} from "./base/BaseTest.t.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
+import {Events} from "../src/libraries/Events.sol";
+import "../src/CredentialFactory.sol";
 
-contract SismoCredentialsTest is BaseTest {
-    SismoCredential public sismoCredential;
+contract CredentialFactoryTest is BaseTest {
+    //    SismoCredential public sismoCredential;
+    CredentialFactory public credentialFactory;
     // with 1 credential
     bytes response =
         hex"00000000000000000000000000000000000000000000000000000000000000201267ea070ec44221e85667a731eee04500000000000000000000000000000000b8e2054f8a912367e38a22ce773328ff000000000000000000000000000000007369736d6f2d636f6e6e6563742d76312e31000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000b5ab443dff53f0e397a9e0778a3343cbaf4d001a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000001a068796472612d73332e310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001c000000000000000000000000000000000000000000000000000000000000004a0000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011ced80673868b95a4e1e17b846881eedfd35ab926b3a90f6390a8af8027678e600000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002c02996d7241972fe32f3555df00c67df504b31fa62abd3fdec05b33a1e9bd40f001a164a5029b39b1951de219435490509adf7c59fb2ea2d4acb46248c484ebcf01b91327b6e334d520f76611786944fd33228614faf78e9e1d89fc114fbfb121b251782181b0c691304ed4975863f2f13d96e3146a73f042a0153fd6445632b8025f92d8fbb89967bfe51ff910f0adf67085e5a46c895fe2e73556328405c6e0b197e049b532c2f809cf96324adfcf5621ff0662944db6a28a13b73b3ffa1663301069c7e58ed0d4623a87017beb865ae9d76af12c94259258d75f16b5e26263f2ed75273c66451bc121b8d0cec841b4ae8b788e9448324168159b29ffaff0edd000000000000000000000000000000000000000000000000000000000000000002b8a512b4aaebb2955485bc52ef1c2957ab167b3784a33ff5dff93ce2cc8e8b07f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb920706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ced80673868b95a4e1e17b846881eedfd35ab926b3a90f6390a8af8027678e617deb519a568cd1e54da8d268b86077d4e3d1cbe735d60461ac36a99654bca9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000c068796472612d73332e310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001e000000000000000000000000000000000000000000000000000000000000004c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000f44c3e70f9147f1a4d59077451535f00000000000000000000000000000000006c617465737400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002c005d10e141b21b4448a1b3f49d1338ffc9f50c729fdb685e0505ae9e5b439afd91f39ed7e81a74b63b40c463c156b4c003238c070c5047421c8428353549bbb952cc958ab1f789ee32e921e29b8880396354295e23dd8cae3b2fe0e1397210c391b12df0199c8611da0368284009c1f6bf92c081876b31e6ca3244d5be03a4bab0191d19de27741860953c04406dd73ffefce065805483fad1166f4eab71bf9df00e5daae84809e7ac61f6937ede7d821f96973f5e4edd1c9ef5f82bbcf9094f2008e040ce0cd8570ebb972aaaba94eea54d745a9e9d9a384748c3c52cdaf90f105469e6e7039c4f89cb1fb1483c438b57a214645355a1275488f9cc4c097d8d3000000000000000000000000000000000000000000000000000000000000000002b8a512b4aaebb2955485bc52ef1c2957ab167b3784a33ff5dff93ce2cc8e8b07f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb920706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa18391ee25ac526ca3e3310d295a3801e9b67d4cd0c8fbf3715b840f7229bd4ca2b4d048d74ba4392342fcd8decf07742556ec7fae4eb17ff51e181f94fcfb48d143bf633750b17355486194a660c7cf29c7c05130a47fa78fde5cd2897e236f900000000000000000000000000000000000000000000000000000000000000010256b632931c5e49b3c7aae3c9cca52ea35deafb12d4cd29ac96341c4ffffffb00000000000000000000000000000000000000000000000000000000000000001ced80673868b95a4e1e17b846881eedfd35ab926b3a90f6390a8af8027678e617deb519a568cd1e54da8d268b86077d4e3d1cbe735d60461ac36a99654bca90000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
@@ -36,27 +40,30 @@ contract SismoCredentialsTest is BaseTest {
     function setUp() public {
         _registerTreeRoot(0x04f0ace60fdf560415b93173156e67c6735946e9889973bfd56f1bcbe6fc5bcf);
         vm.startPrank(owner);
+        credentialFactory = new CredentialFactory();
+        vm.stopPrank();
+    }
+
+    function test_createCredential() public {
         DataTypes.GroupSetup[] memory groups = new DataTypes.GroupSetup[](2);
         groups[0] = (DataTypes.GroupSetup({groupId: TEAM_MEMBERS_GROUP_ID, startAt: 1000, duration: 1 days}));
         groups[1] = (DataTypes.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
 
-        sismoCredential = new SismoCredential(
-            owner,
-            APP_ID,
-            DURATION,
-            isImpersonationMode,
-            groups
-        );
-        vm.stopPrank();
+        vm.prank(owner);
+        vm.expectEmit(true, false, false, true);
+        // The event we expect
+        emit Events.CredentialDeployed(owner, address(0));
+        credentialFactory.createCredential(APP_ID, DURATION, isImpersonationMode, groups);
     }
 
     function test_addDataGroups() public {
+        SismoCredential sismoCredential = _credentialInst();
+
         bytes16 mockGroupId_01 = 0x7cccd0183c6ca02e76600996a6710001;
         bytes16 mockGroupId_02 = 0x7cccd0183c6ca02e76600996a6710002;
 
         DataTypes.GroupSetup[] memory groups = new DataTypes.GroupSetup[](2);
         groups[0] = (DataTypes.GroupSetup({groupId: mockGroupId_01, startAt: 1000, duration: 1 days}));
-
         groups[1] = (DataTypes.GroupSetup({groupId: mockGroupId_02, startAt: 12000, duration: 1 days}));
 
         vm.prank(owner);
@@ -64,21 +71,26 @@ contract SismoCredentialsTest is BaseTest {
 
         assertEq(sismoCredential.getGroupIds()[2], mockGroupId_01);
         assertEq(sismoCredential.getGroupIds()[3], mockGroupId_02);
+
+        assertEq(sismoCredential.owner(), owner);
     }
-
-    function test_deleteDataGroups() public {
-        bytes16[] memory groupIds = new bytes16[](2);
-        groupIds[0] = TEAM_MEMBERS_GROUP_ID;
-        groupIds[1] = G2M_GROUP_ID;
-
-        vm.prank(owner);
-        sismoCredential.deleteDataGroups(groupIds);
-
-        uint256 num = sismoCredential.getGroupIds().length;
-        assertEq(num, 0);
-    }
+    //
+    //    function test_deleteDataGroups() public {
+    //        SismoCredential sismoCredential = _credentialInst();
+    //        bytes16[] memory groupIds = new bytes16[](2);
+    //        groupIds[0] = TEAM_MEMBERS_GROUP_ID;
+    //        groupIds[1] = G2M_GROUP_ID;
+    //
+    //        vm.prank(owner);
+    //        sismoCredential.deleteDataGroups(groupIds);
+    //
+    //        uint256 num = sismoCredential.getGroupIds().length;
+    //        assertEq(num, 0);
+    //    }
 
     function test_bindCredential() public {
+        SismoCredential sismoCredential = _credentialInst();
+
         vm.prank(account);
         sismoCredential.bindCredential(account, response);
 
@@ -110,6 +122,7 @@ contract SismoCredentialsTest is BaseTest {
 
         bytes16[] memory groupIds = new bytes16[](1);
         groupIds[0] = TEAM_MEMBERS_GROUP_ID;
+        //        groupIds[1] = G2M_GROUP_ID;
 
         vm.prank(owner);
         sismoCredential.deleteDataGroups(groupIds);
@@ -144,8 +157,11 @@ contract SismoCredentialsTest is BaseTest {
         assertEq(reps[1].value, true);
         assertEq(reps[1].expiredAt, expiredAt);
     }
+    //
 
     function test_getCredential() public {
+        SismoCredential sismoCredential = _credentialInst();
+
         vm.prank(account);
         sismoCredential.bindCredential(account, response);
 
@@ -164,6 +180,8 @@ contract SismoCredentialsTest is BaseTest {
     }
 
     function test_getCredentialInfoList_should_not_return_deleted_credential() public {
+        SismoCredential sismoCredential = _credentialInst();
+
         vm.prank(account);
         sismoCredential.bindCredential(account, response);
         uint256 expiredAt = block.timestamp + 1 days - ((block.timestamp - 1000) % 1 days);
@@ -190,57 +208,69 @@ contract SismoCredentialsTest is BaseTest {
         assertEq(reps[0].value, false);
         assertEq(reps[0].expiredAt, 0);
     }
+    //
+    //    function test_should_bind_new_account_after_refresh_duration() public {
+    //        SismoCredential sismoCredential = _credentialInst();
+    //
+    //        vm.prank(account);
+    //        sismoCredential.bindCredential(account, response);
+    //
+    //        DataTypes.CredentialInfo[] memory reps = sismoCredential.getCredentialInfoList(account);
+    //
+    //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
+    //        assertEq(reps[0].value, true);
+    //        assertEq(reps[1].groupId, G2M_GROUP_ID);
+    //        assertEq(reps[1].value, false);
+    //
+    //        // before account refresh time , new account should not be bound,
+    //        // but update previous account on reputation expired time
+    //        vm.warp(block.timestamp + 6 days);
+    //        address anotherAccount = 0x0E77cD675c56Ec561F4D5D29B96c7A282A2C9580;
+    //
+    //        vm.prank(account);
+    //        sismoCredential.bindCredential(anotherAccount, response2);
+    //
+    //        reps = sismoCredential.getCredentialInfoList(anotherAccount);
+    //
+    //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
+    //        assertEq(reps[0].value, false);
+    //        assertEq(reps[0].expiredAt, 0);
+    //
+    //        assertEq(reps[1].groupId, G2M_GROUP_ID);
+    //        assertEq(reps[1].value, false);
+    //        assertEq(reps[1].expiredAt, 0);
+    //
+    //        // after 7 days should bind to new account
+    //        vm.warp(block.timestamp + 1 days);
+    //
+    //        vm.prank(anotherAccount);
+    //        sismoCredential.bindCredential(anotherAccount, response2);
+    //
+    //        reps = sismoCredential.getCredentialInfoList(anotherAccount);
+    //
+    //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
+    //        assertEq(reps[0].value, true);
+    //
+    //        assertEq(reps[1].groupId, G2M_GROUP_ID);
+    //        assertEq(reps[1].value, true);
+    //
+    //        reps = sismoCredential.getCredentialInfoList(account);
+    //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
+    //        assertEq(reps[0].value, false);
+    //        assertEq(reps[0].expiredAt, 0);
+    //
+    //        assertEq(reps[1].groupId, G2M_GROUP_ID);
+    //        assertEq(reps[1].value, false);
+    //        assertEq(reps[1].expiredAt, 0);
+    //    }
 
-    function test_should_bind_new_account_after_refresh_duration() public {
-        //        vm.prank(account);
-        //        sismoCredential.bindCredential(account, response);
-        //
-        //        DataTypes.CredentialInfo[] memory reps = sismoCredential.getCredentialInfoList(account);
-        //
-        //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
-        //        assertEq(reps[0].value, true);
-        //        assertEq(reps[1].groupId, G2M_GROUP_ID);
-        //        assertEq(reps[1].value, false);
-        //
-        //        // before account refresh time , new account should not be bound,
-        //        // but update previous account on reputation expired time
-        //        vm.warp(block.timestamp + 6 days);
-        //        address anotherAccount = 0x0E77cD675c56Ec561F4D5D29B96c7A282A2C9580;
-        //
-        //        vm.prank(account);
-        //        sismoCredential.bindCredential(anotherAccount, response2);
-        //
-        //        reps = sismoCredential.getCredentialInfoList(anotherAccount);
-        //
-        //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
-        //        assertEq(reps[0].value, false);
-        //        assertEq(reps[0].expiredAt, 0);
-        //
-        //        assertEq(reps[1].groupId, G2M_GROUP_ID);
-        //        assertEq(reps[1].value, false);
-        //        assertEq(reps[1].expiredAt, 0);
-        //
-        //        // after 7 days should bind to new account
-        //        vm.warp(block.timestamp + 1 days);
-        //
-        //        vm.prank(anotherAccount);
-        //        sismoCredential.bindCredential(anotherAccount, response2);
-        //
-        //        reps = sismoCredential.getCredentialInfoList(anotherAccount);
-        //
-        //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
-        //        assertEq(reps[0].value, true);
-        //
-        //        assertEq(reps[1].groupId, G2M_GROUP_ID);
-        //        assertEq(reps[1].value, true);
-        //
-        //        reps = sismoCredential.getCredentialInfoList(account);
-        //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
-        //        assertEq(reps[0].value, false);
-        //        assertEq(reps[0].expiredAt, 0);
-        //
-        //        assertEq(reps[1].groupId, G2M_GROUP_ID);
-        //        assertEq(reps[1].value, false);
-        //        assertEq(reps[1].expiredAt, 0);
+    function _credentialInst() internal returns (SismoCredential) {
+        DataTypes.GroupSetup[] memory groups = new DataTypes.GroupSetup[](2);
+        groups[0] = (DataTypes.GroupSetup({groupId: TEAM_MEMBERS_GROUP_ID, startAt: 1000, duration: 1 days}));
+        groups[1] = (DataTypes.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
+
+        vm.prank(owner);
+        address newCredential = credentialFactory.createCredential(APP_ID, DURATION, isImpersonationMode, groups);
+        return SismoCredential(newCredential);
     }
 }

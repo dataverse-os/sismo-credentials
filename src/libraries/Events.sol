@@ -9,4 +9,6 @@ library Events {
     event CredentialAdded(bytes16 indexed groupId, uint256 timestamp);
 
     event CredentialRemoved(bytes16 indexed groupId, uint256 timestamp);
+
+    event CredentialDeployed(address indexed owner, address indexed newCredential);
 }
