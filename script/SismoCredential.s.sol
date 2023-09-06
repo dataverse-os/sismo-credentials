@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import {SismoCredential} from "src/SismoCredential.sol";
-import {CredentialFactory} from "src/CredentialFactory.sol";
+import {SismoCredentialFactory} from "src/SismoCredentialFactory.sol";
 import {DataTypes} from "src/libraries/DataTypes.sol";
 import {SismoCredentialFactory} from "../src/SismoCredentialFactory.sol";
 
@@ -27,8 +27,8 @@ contract DeploySismoCredential is Script {
         groups[0] = (DataTypes.GroupSetup({groupId: TEAM_MEMBERS_GROUP_ID, startAt: 1000, duration: 1 days}));
         groups[1] = (DataTypes.GroupSetup({groupId: G2M_GROUP_ID, startAt: 12000, duration: 1 days}));
 
-        CredentialFactory factory = CredentialFactory(credentialFactoryAddr);
-        
+        SismoCredentialFactory factory = SismoCredentialFactory(credentialFactoryAddr);
+
         vm.broadcast(deployerPrivateKey);
         address newCredential = factory.createCredential(APP_ID, DURATION, isImpersonationMode, groups);
         console.log("new deployed credential: ", newCredential);
