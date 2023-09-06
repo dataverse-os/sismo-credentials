@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "sismo-connect-solidity/SismoLib.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "sismo-connect-solidity/SismoConnectLib.sol";
+import {EnumerableSet} from "openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Events} from "./libraries/Events.sol";
 import {Errors} from "./libraries/Errors.sol";
+import {Ownable} from "./libraries/Ownable.sol";
 
 contract SismoCredential is SismoConnect, Ownable {
     using SismoConnectHelper for SismoConnectVerifiedResult;
@@ -25,9 +25,13 @@ contract SismoCredential is SismoConnect, Ownable {
 
     bytes16[] internal _groupIds;
 
-    constructor(bytes16 appId, uint256 duration, bool isImpersonationMode, DataTypes.GroupSetup[] memory groups)
-        SismoConnect(buildConfig(appId, isImpersonationMode))
-    {
+    constructor(
+        address owner,
+        bytes16 appId,
+        uint256 duration,
+        bool isImpersonationMode,
+        DataTypes.GroupSetup[] memory groups
+    ) Ownable(owner) SismoConnect(buildConfig(appId, isImpersonationMode)) {
         REFRESH_DURATION = duration;
         _addDataGroups(groups);
     }
