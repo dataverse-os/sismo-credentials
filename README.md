@@ -8,8 +8,9 @@ anvil --fork-url https://gateway.tenderly.co/public/polygon-mumbai --chain-id 51
 
 # deploy contracts
 ```
-forge script script/SismoCredentialFactory.s.sol --rpc-url $MUMBAI_RPC_URL --broadcast -vvvv
-forge script script/SismoCredential.s.sol --rpc-url $MUMBAI_RPC_URL --broadcast -vvvv
+source .env
+forge script script/SismoCredentialFactory.s.sol --rpc-url $MUMBAI_RPC_URL --broadcast -vvvv --legacy
+forge script script/SismoCredential.s.sol --rpc-url $MUMBAI_RPC_URL --broadcast -vvvv --legacy
 ```
 
 # or deploy with owner's private key

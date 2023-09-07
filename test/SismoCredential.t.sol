@@ -28,7 +28,7 @@ contract SismoCredentialsTest is BaseTest {
 
     // sismo appId
     bytes16 public constant APP_ID = 0x1267ea070ec44221e85667a731eee045;
-    uint256 public constant DURATION = 7 days;
+    uint256 public constant REFRESH_DURATION = 7 days;
 
     address public owner = 0xb5AB443DfF53F0e397a9E0778A3343Cbaf4D001a;
     address public account = 0xb5AB443DfF53F0e397a9E0778A3343Cbaf4D001a;
@@ -43,11 +43,22 @@ contract SismoCredentialsTest is BaseTest {
         sismoCredential = new SismoCredential(
             owner,
             APP_ID,
-            DURATION,
+            REFRESH_DURATION,
             isImpersonationMode,
             groups
         );
         vm.stopPrank();
+    }
+
+    function test_setRefreshDuration() public {
+        assertEq(sismoCredential.getRefreshDuration(), REFRESH_DURATION);
+
+        uint256 newDuration = REFRESH_DURATION * 2;
+
+        vm.prank(owner);
+        sismoCredential.setRefreshDuration(newDuration);
+
+        assertEq(sismoCredential.getRefreshDuration(), newDuration);
     }
 
     function test_addDataGroups() public {
@@ -92,6 +103,8 @@ contract SismoCredentialsTest is BaseTest {
         assertEq(reps[1].groupId, G2M_GROUP_ID);
         assertEq(reps[1].value, false);
         assertEq(reps[1].expiredAt, 0);
+
+        vm.warp(block.timestamp + REFRESH_DURATION);
 
         vm.prank(account);
         sismoCredential.bindCredential(account, response3);
@@ -189,58 +202,5 @@ contract SismoCredentialsTest is BaseTest {
         assertEq(reps[0].groupId, G2M_GROUP_ID);
         assertEq(reps[0].value, false);
         assertEq(reps[0].expiredAt, 0);
-    }
-
-    function test_should_bind_new_account_after_refresh_duration() public {
-        //        vm.prank(account);
-        //        sismoCredential.bindCredential(account, response);
-        //
-        //        DataTypes.CredentialInfo[] memory reps = sismoCredential.getCredentialInfoList(account);
-        //
-        //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
-        //        assertEq(reps[0].value, true);
-        //        assertEq(reps[1].groupId, G2M_GROUP_ID);
-        //        assertEq(reps[1].value, false);
-        //
-        //        // before account refresh time , new account should not be bound,
-        //        // but update previous account on reputation expired time
-        //        vm.warp(block.timestamp + 6 days);
-        //        address anotherAccount = 0x0E77cD675c56Ec561F4D5D29B96c7A282A2C9580;
-        //
-        //        vm.prank(account);
-        //        sismoCredential.bindCredential(anotherAccount, response2);
-        //
-        //        reps = sismoCredential.getCredentialInfoList(anotherAccount);
-        //
-        //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
-        //        assertEq(reps[0].value, false);
-        //        assertEq(reps[0].expiredAt, 0);
-        //
-        //        assertEq(reps[1].groupId, G2M_GROUP_ID);
-        //        assertEq(reps[1].value, false);
-        //        assertEq(reps[1].expiredAt, 0);
-        //
-        //        // after 7 days should bind to new account
-        //        vm.warp(block.timestamp + 1 days);
-        //
-        //        vm.prank(anotherAccount);
-        //        sismoCredential.bindCredential(anotherAccount, response2);
-        //
-        //        reps = sismoCredential.getCredentialInfoList(anotherAccount);
-        //
-        //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
-        //        assertEq(reps[0].value, true);
-        //
-        //        assertEq(reps[1].groupId, G2M_GROUP_ID);
-        //        assertEq(reps[1].value, true);
-        //
-        //        reps = sismoCredential.getCredentialInfoList(account);
-        //        assertEq(reps[0].groupId, TEAM_MEMBERS_GROUP_ID);
-        //        assertEq(reps[0].value, false);
-        //        assertEq(reps[0].expiredAt, 0);
-        //
-        //        assertEq(reps[1].groupId, G2M_GROUP_ID);
-        //        assertEq(reps[1].value, false);
-        //        assertEq(reps[1].expiredAt, 0);
     }
 }

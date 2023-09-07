@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {Events} from "./libraries/Events.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
