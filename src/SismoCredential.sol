@@ -3,10 +3,10 @@ pragma solidity ^0.8.19;
 
 import "sismo-connect-solidity/SismoConnectLib.sol";
 import {EnumerableSet} from "openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";
+import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Events} from "./libraries/Events.sol";
 import {Errors} from "./libraries/Errors.sol";
-import {Ownable} from "./libraries/Ownable.sol";
 
 contract SismoCredential is SismoConnect, Ownable {
     using SismoConnectHelper for SismoConnectVerifiedResult;
@@ -19,8 +19,7 @@ contract SismoCredential is SismoConnect, Ownable {
     /**
      * @dev account => dataGroupId => credential info
      */
-    mapping(address => mapping(bytes16 => DataTypes.CredentialInfo))
-        public getCredentialInfo;
+    mapping(address => mapping(bytes16 => DataTypes.CredentialInfo)) public getCredentialInfo;
 
     /**
      * @dev groupId => group setting
@@ -40,7 +39,8 @@ contract SismoCredential is SismoConnect, Ownable {
         uint256 refreshDuration,
         bool isImpersonationMode,
         DataTypes.GroupSetup[] memory groups
-    ) Ownable(owner) SismoConnect(buildConfig(appId, isImpersonationMode)) {
+    ) SismoConnect(buildConfig(appId, isImpersonationMode)) {
+        _transferOwnership(owner);
         _setRefreshDuration(refreshDuration);
         _addDataGroups(groups);
     }
@@ -53,9 +53,7 @@ contract SismoCredential is SismoConnect, Ownable {
         _setRefreshDuration(refreshDuration);
     }
 
-    function addDataGroups(
-        DataTypes.GroupSetup[] memory _groups
-    ) public onlyOwner {
+    function addDataGroups(DataTypes.GroupSetup[] memory _groups) public onlyOwner {
         _addDataGroups(_groups);
     }
 
@@ -78,11 +76,7 @@ contract SismoCredential is SismoConnect, Ownable {
         uint256 len = _groupIds.length;
         ClaimRequest[] memory claims = new ClaimRequest[](len);
         for (uint256 i; i < len; i++) {
-            claims[i] = buildClaim({
-                groupId: _groupIds[i],
-                isSelectableByUser: false,
-                isOptional: true
-            });
+            claims[i] = buildClaim({groupId: _groupIds[i], isSelectableByUser: false, isOptional: true});
         }
 
         SismoConnectVerifiedResult memory result = verify({
@@ -95,9 +89,7 @@ contract SismoCredential is SismoConnect, Ownable {
         uint256 vaultId = result.getUserId(AuthType.VAULT);
         DataTypes.Account storage acc = _bindingAccount[vaultId];
         if (acc.refreshAfter > block.timestamp) {
-            revert Errors.RefreshDurationNotOver(
-                acc.refreshAfter - block.timestamp
-            );
+            revert Errors.RefreshDurationNotOver(acc.refreshAfter - block.timestamp);
         }
         _deleteCredentialInfo(acc.account);
         acc.account = account;
@@ -105,16 +97,11 @@ contract SismoCredential is SismoConnect, Ownable {
         _updateCredentialInfo(account, result, vaultId);
     }
 
-    function getCredentialInfoList(
-        address account
-    ) external view returns (DataTypes.CredentialInfo[] memory) {
+    function getCredentialInfoList(address account) external view returns (DataTypes.CredentialInfo[] memory) {
         uint256 len = _groupIds.length;
-        DataTypes.CredentialInfo[]
-            memory infos = new DataTypes.CredentialInfo[](len);
+        DataTypes.CredentialInfo[] memory infos = new DataTypes.CredentialInfo[](len);
         for (uint256 i = 0; i < len; i++) {
-            DataTypes.CredentialInfo memory r = getCredentialInfo[account][
-                _groupIds[i]
-            ];
+            DataTypes.CredentialInfo memory r = getCredentialInfo[account][_groupIds[i]];
             if (r.expiredAt < block.timestamp) {
                 r.value = false;
             }
@@ -158,23 +145,18 @@ contract SismoCredential is SismoConnect, Ownable {
         }
     }
 
-    function _updateCredentialInfo(
-        address account,
-        SismoConnectVerifiedResult memory result,
-        uint256 vaultId
-    ) internal {
+    function _updateCredentialInfo(address account, SismoConnectVerifiedResult memory result, uint256 vaultId)
+        internal
+    {
         for (uint256 i = 0; i < result.claims.length; i++) {
             VerifiedClaim memory verifiedClaim = result.claims[i];
             bytes16 groupId = verifiedClaim.groupId;
 
             DataTypes.GroupSetup memory groupSetup = getGroupSetup[groupId];
-            DataTypes.CredentialInfo storage credentialInfo = getCredentialInfo[
-                account
-            ][groupId];
+            DataTypes.CredentialInfo storage credentialInfo = getCredentialInfo[account][groupId];
 
-            uint256 expiredAt = block.timestamp +
-                groupSetup.duration -
-                ((block.timestamp - groupSetup.startAt) % groupSetup.duration);
+            uint256 expiredAt =
+                block.timestamp + groupSetup.duration - ((block.timestamp - groupSetup.startAt) % groupSetup.duration);
 
             credentialInfo.groupId = groupSetup.groupId;
             credentialInfo.value = true;

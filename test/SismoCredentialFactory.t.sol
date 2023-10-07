@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import "forge-std/Test.sol";
 import {BaseTest} from "./base/BaseTest.t.sol";
 import {SismoCredentialFactory} from "../src/SismoCredentialFactory.sol";
+import {SismoCredential} from "../src/SismoCredential.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Events} from "../src/libraries/Events.sol";
 
@@ -38,6 +39,8 @@ contract SismoCredentialFactoryTest is BaseTest {
         vm.prank(creator);
         vm.expectEmit(true, false, false, true);
         emit Events.CredentialDeployed(creator, address(0));
-        credentialFactory.createCredential(APP_ID, REFRESH_DURATION, isImpersonationMode, groups);
+        address sismoCredential =
+            credentialFactory.createCredential(APP_ID, REFRESH_DURATION, isImpersonationMode, groups);
+        assertEq(SismoCredential(sismoCredential).owner(), creator);
     }
 }

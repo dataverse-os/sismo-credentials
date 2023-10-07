@@ -1,0 +1,16 @@
+{
+  "name": "sismo-credentials",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "source .env && forge test --fork-url $MUMBAI_RPC_URL",
+    "lint": "solhint src/**/*.sol"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "solhint": "^3.6.2"
+  }
+}
