@@ -20,7 +20,7 @@ Our contract inherits the functionality of verifying owner identity through ZK p
 
 Application developers can create their own dedicated `SismoCredential` contracts using the `SismoCredentialFactory`, with the caller being the default owner.
 
-In addition, we have **SDK** and **backend** that are compatible with the contract. The SDK makes it easy for developers to retrieve contract information and perform contract operations on the frontend. The backend allows application developers to create and update the data groups list. When using Sismo's data groups, the API can be provided to Sismo. Sismo will periodically fetch the provided address/account list through the API and update accordingly.
+In addition, we have **SDK**( sismo-client in monorepo [dweb-toolkits](https://github.com/dataverse-os/dweb-toolkits/tree/main) ) and **backend** that are compatible with the contract. The SDK makes it easy for developers to retrieve contract information and perform contract operations on the frontend. The backend allows application developers to create and update the data groups list. When using Sismo's data groups, the API can be provided to Sismo. Sismo will periodically fetch the provided address/account list through the API and update accordingly.
 
 ## Setup
 
