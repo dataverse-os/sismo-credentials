@@ -6,7 +6,7 @@ import {SismoCredential} from "../src/SismoCredential.sol";
 import {BaseTest} from "./base/BaseTest.t.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
 
-contract SismoCredentialsTest is BaseTest {
+contract SismoCredentialTest is BaseTest {
     SismoCredential public sismoCredential;
     // with 1 credential
     bytes response =

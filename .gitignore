@@ -19,6 +19,6 @@ dist/
 # idea
 .idea/
 
-# demo
-front/
-reputations-sdk/
+# npm
+node_modules
+pnpm-lock.yaml
